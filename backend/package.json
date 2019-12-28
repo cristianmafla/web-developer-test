@@ -1,0 +1,49 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "developer test",
+  "main": "index.js",
+  "scripts": {
+    "dev": "babel-node index.js",
+    "start": "nodemon --exec cross-env NODE_ENV=development babel-node index.js",
+    "prod": "cross-env NODE_ENV=production babel-node index.js",
+    "db:up": "npx sequelize-cli db:create && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cristianmafla/web-developer-test.git"
+  },
+  "author": "cristian mafla < cristiancaxi@gmail.com >",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cristianmafla/web-developer-test/issues"
+  },
+  "homepage": "https://github.com/cristianmafla/web-developer-test#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^10.0.3",
+    "babel-preset-env": "^1.7.0",
+    "cross-env": "^6.0.3",
+    "eslint": "^6.8.0",
+    "nodemon": "^2.0.2",
+    "npx": "^10.2.0",
+    "prettier-eslint": "^9.0.1"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.4",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "glob": "^7.1.6",
+    "helmet": "^3.21.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.8.3",
+    "mysql2": "^2.1.0",
+    "path": "^0.12.7",
+    "sequelize": "^5.21.3",
+    "sequelize-cli": "^5.5.1"
+  }
+}
