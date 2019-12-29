@@ -6,7 +6,7 @@ import { Row, Col, Card, Button, Form } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import Selection from 'react-select';
 import { ContextAuth } from '../../context/auth';
-import { USER_AND_JOBS, UPDATE_JOB, DELETE_JOB } from '../../utils/variables';
+import { USER_AND_JOBS, UPDATE_JOB, DELETE_JOB, CREATE_JOB } from '../../utils/variables';
 import WindowModal from '../modal';
 import { RedirectLogin } from '../utils';
 import { getToken, alert, alertDeleteJob } from '../../utils';
@@ -34,7 +34,11 @@ export default class Jobs extends Component {
 					label: 'alta',
 					value: 'alta'
 				}
-			]
+			],
+			newExpirationDate: null,
+			newName: '',
+			newSelect: '',
+			newDescription: ''
 		};
 	}
 
@@ -78,7 +82,53 @@ export default class Jobs extends Component {
 		}
 	};
 
-	clearJob = () => {
+	createJob = async (e) => {
+		e.preventDefault();
+		try {
+
+			const name = this.state.newName;
+			const priority = this.state.newSelect;
+			const user = getToken().id;
+			const description = this.state.newDescription;
+			const expirationDate = this.state.newExpirationDate || new Date();
+
+			if(name && priority && user && description && expirationDate){
+				const newJob = await axios.post(CREATE_JOB,{
+					name,
+					priority,
+					user,
+					description,
+					expirationDate
+				});
+	
+				if(newJob.data.state){
+					this.setState({dataJobs:newJob.data.data});
+					alert('success','se ha creado una nueva tarea','se creó correctamente')
+				}
+				return;
+			}
+			alert('warning','campos vacíos','los campos [ fecha, titulo, prioridad, descripción ] son obligatorios')
+			
+		} catch (error) {
+			console.log('=======error=======> ', error);
+			if(!error.response.data.state){
+				alert('error','error creando la tarea',error.response.data.data);
+				return;
+			}
+			alert('error','error creando la tarea', 'no se creo la tarea, vuelva a intentarlo mas tarde')
+		}
+	};
+
+	clearJobCreate = () => {
+		this.setState({
+			newName: '',
+			newDescription: '',
+			newSelect: '',
+			newExpirationDate: null
+		});
+	};
+
+	clearJobEdit = () => {
 		this.setState({
 			name: '',
 			description: '',
@@ -156,10 +206,70 @@ export default class Jobs extends Component {
 		);
 	};
 
+	FormCreateJobs = () => {
+		return (
+			<Form onSubmit={(e) => this.createJob(e)}>
+				<Form.Group controlId="input_date_job">
+					<Form.Label className="lbl_date_update_jobs">fecha</Form.Label>
+					<DatePicker
+						onKeyDown={(e) => e.preventDefault()}
+						autoComplete="false"
+						className="date_update_jobs"
+						selected={this.state.newExpirationDate ? new Date(this.state.newExpirationDate) : new Date()}
+						onChange={(e) => this.setState({ newExpirationDate: moment(e).format('L') })}
+						dateFormat="dd/MM/yyyy"
+					/>
+				</Form.Group>
+
+				<Form.Group controlId="input_name_job">
+					<Form.Label>Titulo</Form.Label>
+					<Form.Control
+						type="text"
+						autoComplete="off"
+						defaultValue={this.state.newName}
+						maxLength={255}
+						onChange={(e) => this.setState({ newName: e.target.value })}
+					/>
+				</Form.Group>
+
+				<Form.Group controlId="input_select_job">
+					<Form.Label className="lbl_date_update_jobs">Prioridad</Form.Label>
+					<Selection
+						placeholder="Seleccionar"
+						value={{
+							value: this.state.newSelect,
+							label: this.state.newSelect || 'Seleccionar'
+						}}
+						onChange={(e) => this.setState({ newSelect: e.value })}
+						options={this.state.selectOptions.map((data) => ({
+							value: data.value,
+							label: data.label
+						}))}
+					/>
+				</Form.Group>
+
+				<Form.Group controlId="input_description_job">
+					<Form.Label>Descripción</Form.Label>
+					<Form.Control
+						as="textarea"
+						rows="3"
+						defaultValue={this.state.newDescription}
+						maxLength={255}
+						onChange={(e) => this.setState({ newDescription: e.target.value })}
+					/>
+				</Form.Group>
+
+				<Button variant="primary" type="submit">
+					Crear
+				</Button>
+			</Form>
+		);
+	};
+
 	deleteJob = async (id) => {
 		try {
 			const resultDelete = await axios.post(DELETE_JOB, { id, user: getToken().id });
-			this.setState({dataJobs:resultDelete.data.data})
+			this.setState({ dataJobs: resultDelete.data.data });
 		} catch (error) {
 			console.log('=======error=======> ', error.response.data);
 		}
@@ -188,7 +298,7 @@ export default class Jobs extends Component {
 							title="Modificación de Tarea"
 							btnsend="Modificar"
 							openFunction={() => {}}
-							closeFunction={this.clearJob}
+							closeFunction={this.clearJobEdit}
 						>
 							{this.FormEditJobs(data)}
 						</WindowModal>
@@ -226,8 +336,10 @@ export default class Jobs extends Component {
 											title="Nueva Tarea"
 											btnsend="Enviar"
 											openFunction={() => {}}
-											closeFunction={() => {}}
-										/>
+											closeFunction={this.clearJobCreate}
+										>
+											{this.FormCreateJobs()}
+										</WindowModal>
 									</Col>
 								</Row>
 								<br />
