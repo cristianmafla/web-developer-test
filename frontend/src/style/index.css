@@ -79,4 +79,13 @@
   transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
   transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
 }
+
+.login_form {
+  color: #ffffff;
+  background-color: #343a40;
+}
+
+.div_btn_registrar {
+  margin-top: 10px;
+}
 /*# sourceMappingURL=index.css.map */

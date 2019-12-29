@@ -53,19 +53,27 @@ export const create = async (req, res) => {
 		const { name, email, password } = req.body;
 
 		if (name && email && password) {
-			const newUser = await db.User.create({
-				name,
-				email,
-				password
+			const existUser = await db.User.findOne({
+				where:{email},
+				raw:true
 			});
-
-			if (newUser) {
-				res.status(200).send({ state: true, data: newUser });
-			} else {
-				res
-					.status(200)
-					.send({ state: false, data: `no se pudo crear el usuario,vuelva a intentarlo mas tarde` });
+			if(!existUser){
+				const newUser = await db.User.create({
+					name,
+					email,
+					password
+				});
+	
+				if (newUser) {
+					res.status(200).send({ state: true, data: newUser });
+				} else {
+					res
+						.status(200)
+						.send({ state: false, data: `no se pudo crear el usuario,vuelva a intentarlo mas tarde` });
+				}
+				return;
 			}
+			res.status(400).send({ state: false, data: `ya existe un usuario registrado con este correo: ${email}` });
 			return;
 		}
 

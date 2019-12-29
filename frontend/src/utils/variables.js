@@ -12,3 +12,7 @@ export const UPDATE_JOB = `${URL_BACK}job/update`;
 
 export const DELETE_JOB = `${URL_BACK}job/delete`;
 
+export const CREATE_NEW_USER = `${URL_BACK}user/new`;
+
+
+

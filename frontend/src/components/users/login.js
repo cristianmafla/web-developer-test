@@ -4,6 +4,8 @@ import axios from 'axios';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import { ContextAuth } from '../../context/auth';
 import { alert } from '../../utils';
+import ModalLogin from '../modal';
+import { CREATE_NEW_USER } from '../../utils/variables';
 
 export default class Login extends Component {
 	constructor(props) {
@@ -11,7 +13,11 @@ export default class Login extends Component {
 		this.state = {
 			email: '',
 			password: '',
-			btnLogin: 'Ingresar'
+			btnLogin: 'Ingresar',
+			newName: '',
+			newEmail: '',
+			newPass: '',
+			newConfirmPass: ''
 		};
 	}
 
@@ -43,7 +49,7 @@ export default class Login extends Component {
 
 	FormLogin = (startSession) => {
 		return (
-			<Col sm={4} style={{ margin: '0 auto' }} className="container_principal">
+			<Col sm={4} style={{ margin: '0 auto' }} className="container_principal login_form">
 				<h3>Login de usuarios</h3>
 				<Form onSubmit={(e) => this.submitLogin(e, startSession)}>
 					<Form.Group controlId="email_control">
@@ -90,8 +96,107 @@ export default class Login extends Component {
 					>
 						Limpiar
 					</Button>
+					<div className="div_btn_registrar">
+						<ModalLogin
+							title="Registro de usuarios"
+							btnOpen="Registrarme"
+							closeFunction={() => {}}
+							openFunction={() => {}}
+						>
+							{this.FormRegister()}
+						</ModalLogin>
+					</div>
 				</Form>
 			</Col>
+		);
+	};
+
+	createNewAccount = async () => {
+		try {
+			const name = this.state.newName;
+			const email = this.state.newEmail;
+			const password = this.state.newPass;
+			const confirmPass = this.state.newConfirmPass;
+
+			console.log('=======name,email,password,confirmPass=======> ', name, email, password, confirmPass);
+
+			if (name && email && password && confirmPass) {
+				if (password === confirmPass) {
+					const newUser = await axios.post(CREATE_NEW_USER, {
+						name,
+						email,
+						password
+					});
+					console.log('=======newUser.data.data=======> ', newUser.data.data);
+
+					if (newUser.data.state) {
+						this.setState({ email: newUser.data.data.email });
+						alert('success', 'Se creó el usuario', 'se creó correctamente un nuevo usuario');
+					}
+					return;
+				}
+				alert('error', 'Error de contraseña', 'las constraseñas no coinciden');
+				return;
+			}
+
+			alert(
+				'error',
+				'campos vacíos',
+				'los campos [ nombre, correo, contraseña , confirmar contraseña] son obligatorios'
+			);
+		} catch (error) {
+			console.log('=======error=======> ', error);
+			if (!error.response.data.state) {
+				alert('error', 'Error creando el usuario', error.response.data.data);
+				return;
+			}
+			alert('error', 'Error creando el usuario', 'no se pudo crear el usuario,vuelva a intentarlo mas tarde');
+		}
+	};
+
+	FormRegister = () => {
+		return (
+			<Form onSubmit={(e) => {}} id="form_register_user">
+				<Form.Group controlId="input_name_register">
+					<Form.Label>Nombre</Form.Label>
+					<Form.Control
+						type="text"
+						placeholder="Nombre"
+						onChange={(e) => this.setState({ newName: e.target.value })}
+					/>
+				</Form.Group>
+
+				<Form.Group controlId="input_correo_register">
+					<Form.Label>Correo</Form.Label>
+					<Form.Control
+						type="email"
+						placeholder="Correo"
+						onChange={(e) => this.setState({ newEmail: e.target.value })}
+					/>
+				</Form.Group>
+
+				<Form.Group controlId="input_pass_register">
+					<Form.Label>contraseña</Form.Label>
+					<Form.Control
+						type="password"
+						placeholder="Contraseña"
+						onChange={(e) => this.setState({ newPass: e.target.value })}
+					/>
+				</Form.Group>
+
+				<Form.Group controlId="input_pass_confirm_register">
+					<Form.Label>Confirmar contraseña</Form.Label>
+					<Form.Control
+						type="password"
+						placeholder="Confirmar contraseña"
+						onChange={(e) => this.setState({ newConfirmPass: e.target.value })}
+					/>
+				</Form.Group>
+
+				<Button variant="primary" type="button" onClick={this.createNewAccount}>
+					Registrarme
+				</Button>
+			</Form>
 		);
 	};
 
@@ -99,7 +204,6 @@ export default class Login extends Component {
 		return (
 			<ContextAuth.Consumer>
 				{({ authenticated, user, startSession, closeSession }) => {
-					
 					if (!authenticated) {
 						return (
 							<Row>
@@ -108,8 +212,7 @@ export default class Login extends Component {
 						);
 					}
 
-					return <Redirect to='/jobs'/>;
-
+					return <Redirect to="/jobs" />;
 				}}
 			</ContextAuth.Consumer>
 		);
