@@ -85,37 +85,35 @@ export default class Jobs extends Component {
 	createJob = async (e) => {
 		e.preventDefault();
 		try {
-
 			const name = this.state.newName;
 			const priority = this.state.newSelect;
 			const user = getToken().id;
 			const description = this.state.newDescription;
 			const expirationDate = this.state.newExpirationDate || new Date();
 
-			if(name && priority && user && description && expirationDate){
-				const newJob = await axios.post(CREATE_JOB,{
+			if (name && priority && user && description && expirationDate) {
+				const newJob = await axios.post(CREATE_JOB, {
 					name,
 					priority,
 					user,
 					description,
 					expirationDate
 				});
-	
-				if(newJob.data.state){
-					this.setState({dataJobs:newJob.data.data});
-					alert('success','se ha creado una nueva tarea','se creó correctamente')
+
+				if (newJob.data.state) {
+					this.setState({ dataJobs: newJob.data.data });
+					alert('success', 'se ha creado una nueva tarea', 'se creó correctamente');
 				}
 				return;
 			}
-			alert('warning','campos vacíos','los campos [ fecha, titulo, prioridad, descripción ] son obligatorios')
-			
+			alert('warning', 'campos vacíos', 'los campos [ fecha, titulo, prioridad, descripción ] son obligatorios');
 		} catch (error) {
 			console.log('=======error=======> ', error);
-			if(!error.response.data.state){
-				alert('error','error creando la tarea',error.response.data.data);
+			if (!error.response.data.state) {
+				alert('error', 'error creando la tarea', error.response.data.data);
 				return;
 			}
-			alert('error','error creando la tarea', 'no se creo la tarea, vuelva a intentarlo mas tarde')
+			alert('error', 'error creando la tarea', 'no se creo la tarea, vuelva a intentarlo mas tarde');
 		}
 	};
 
@@ -276,9 +274,22 @@ export default class Jobs extends Component {
 	};
 
 	PendingJobs = (data, key) => {
+		const type = (data) => {
+			switch (data) {
+				case 'baja':
+					return 'dark';
+				case 'media':
+					return 'warning';
+				case 'alta':
+					return 'danger';
+				default:
+					return 'dark';
+			}
+		};
+
 		return (
 			<Col sm={3} className="cards_jobs" key={key}>
-				<Card bg="dark" text="white" style={{ width: '17rem' }}>
+				<Card bg={type(data.priority)} text="white" style={{ width: '17rem' }}>
 					<Card.Header>fecha limite: {moment(data.expirationDate).format('DD/MM/YYYY')}</Card.Header>
 
 					<Card.Body>
