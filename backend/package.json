@@ -7,7 +7,7 @@
     "dev": "babel-node index.js",
     "start": "nodemon --exec cross-env NODE_ENV=development babel-node index.js",
     "prod": "cross-env NODE_ENV=production babel-node index.js",
-    "db:up": "npx sequelize-cli db:create && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all && npm start"
+    "db": "npx sequelize-cli db:create && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all && npm start"
   },
   "repository": {
     "type": "git",

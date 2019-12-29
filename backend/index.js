@@ -42,9 +42,7 @@ if (CONFIG_SERVER.ssl) {
 }
 
 httpServer.listen(PORT, () => {
-	console.log(
-		'==============> ',
-		`[ SERVER: ${environment} ] ${CONFIG_SERVER.http}://${CONFIG_SERVER.hostname}:${PORT}`,
-		'==============> '
-	);
+	console.log('=============================================================================>')
+	console.log(`[ SERVER: ${environment} ] ${CONFIG_SERVER.http}://${CONFIG_SERVER.hostname}:${PORT}`);
+	console.log('=============================================================================>')
 });

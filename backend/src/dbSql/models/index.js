@@ -16,8 +16,16 @@ if (config.use_env_variable) {
 }
 
 sequelize.authenticate()
-  .then(() => console.log('==============> ',`DATABASE CONNECTION OK`,'==============>'))
-  .catch(error => console.log('==============> ',`DATABASE CONNECTION ERROR  ::: `,error,'==============>'));
+  .then(() => {
+    console.log('=============================================================================>')
+    console.log(`DATABASE CONNECTION OK`)
+    console.log('=============================================================================>')
+  })
+  .catch(error => {
+    console.log('=============================================================================>')
+    console.log(`DATABASE CONNECTION ERROR  ::: `,error);
+    console.log('=============================================================================>')
+  });
 
 fs
   .readdirSync(__dirname)

@@ -1,5 +1,4 @@
 import React, { Component, Fragment } from 'react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 import moment from 'moment';
 import { Row, Col, Card, Button, Form } from 'react-bootstrap';
@@ -38,14 +37,43 @@ export default class Jobs extends Component {
 			newExpirationDate: null,
 			newName: '',
 			newSelect: '',
-			newDescription: ''
+			newDescription: '',
+			dataExpiredJobs:[],
+			dataNextExpireJobs:[]
 		};
 	}
 
 	componentDidMount = async () => {
 		const { data } = await axios.get(`${USER_AND_JOBS}/${getToken().id}`);
-		this.setState({ dataJobs: data.data.Job });
+		this.setState({ 
+			dataJobs: data.data.Job,
+			dataJobsCopy:data.data.Job,
+			dataExpiredJobs:this.expiredJobs(data.data.Job),
+			dataNextExpireJobs:this.nextExpireJobs(data.data.Job)
+		});
+		console.log('=======tareas vencidas=======> ',this.expiredJobs(data.data.Job))
+		console.log('=======tareas proximas a vencer=======> ',this.nextExpireJobs(data.data.Job))
+	
 	};
+
+	expiredJobs = Job => {
+		return Job.filter(data => {
+			const timeCurrent = Date.parse(moment(new Date()).format());
+			const timeExpiredJob = Date.parse(moment(data.expirationDate).format());
+			if(timeCurrent >= timeExpiredJob) return data;
+		});
+	}
+
+	nextExpireJobs = Job => {
+		return Job.filter(data => {
+			const timeCurrent = moment(new Date());
+			const timeExpiredJob = moment(data.expirationDate);
+			const difference = timeExpiredJob.diff(timeCurrent,'hours')
+			console.log('=======difference=======> ',data.id,difference)
+			
+			if(difference > 1 && difference < 48) return data;
+		});
+	}
 
 	updateJob = async (e, data) => {
 		e.preventDefault();
@@ -66,7 +94,12 @@ export default class Jobs extends Component {
 				});
 
 				if (updateMyJob.data.state) {
-					this.setState({ dataJobs: updateMyJob.data.data });
+					this.setState({ 
+						dataJobs: updateMyJob.data.data,
+						dataJobsCopy:updateMyJob.data.data,
+						dataExpiredJobs:this.expiredJobs(updateMyJob.data.data),
+						dataNextExpireJobs:this.nextExpireJobs(updateMyJob.data.data)
+				 });
 					alert('success', 'se modificó correctamente', null);
 					return;
 				}
@@ -101,7 +134,12 @@ export default class Jobs extends Component {
 				});
 
 				if (newJob.data.state) {
-					this.setState({ dataJobs: newJob.data.data });
+					this.setState({ 
+						dataJobs: newJob.data.data,
+						dataJobsCopy:newJob.data.data,
+						dataExpiredJobs:this.expiredJobs(newJob.data.data),
+						dataNextExpireJobs:this.nextExpireJobs(newJob.data.data)
+					});
 					alert('success', 'se ha creado una nueva tarea', 'se creó correctamente');
 				}
 				return;
@@ -267,7 +305,12 @@ export default class Jobs extends Component {
 	deleteJob = async (id) => {
 		try {
 			const resultDelete = await axios.post(DELETE_JOB, { id, user: getToken().id });
-			this.setState({ dataJobs: resultDelete.data.data });
+			this.setState({ 
+				dataJobs: resultDelete.data.data,
+				dataJobsCopy:resultDelete.data.data,
+				dataExpiredJobs:this.expiredJobs(resultDelete.data.data),
+				dataNextExpireJobs:this.nextExpireJobs(resultDelete.data.data)
+			});
 		} catch (error) {
 			console.log('=======error=======> ', error.response.data);
 		}
@@ -293,13 +336,16 @@ export default class Jobs extends Component {
 					<Card.Header>fecha limite: {moment(data.expirationDate).format('DD/MM/YYYY')}</Card.Header>
 
 					<Card.Body>
-						<Card.Title>{data.name}</Card.Title>
+						<Card.Text>
+							<b>Id: {data.id}</b>
+						</Card.Text>
+						<Card.Title>Titulo: {data.name}</Card.Title>
 						<Card.Text>
 							<b>
 								<i>Prioridad: {data.priority}</i>
 							</b>
 						</Card.Text>
-						<Card.Text>{data.description}</Card.Text>
+						<Card.Text>Descripción: {data.description}</Card.Text>
 					</Card.Body>
 
 					<Card.Footer>
@@ -342,6 +388,7 @@ export default class Jobs extends Component {
 								</Row>
 								<Row>
 									<Col>
+
 										<WindowModal
 											btnOpen={`Crear Tarea`}
 											title="Nueva Tarea"
@@ -351,16 +398,45 @@ export default class Jobs extends Component {
 										>
 											{this.FormCreateJobs()}
 										</WindowModal>
+
+										<Button 
+											size="sm"
+											type="button"
+											variant="outline-dark"
+											style={{marginRight:5}}
+											onClick={() => this.setState({dataJobs:this.state.dataJobsCopy})}
+										>
+											Todas {this.state.dataJobs.length}
+										</Button>
+
+										<Button 
+											size="sm"
+											type="button"
+											variant="outline-danger"
+											style={{marginRight:5}}
+											onClick={() => this.setState({dataJobs:this.state.dataExpiredJobs})}
+										>
+											Vencidas {this.state.dataExpiredJobs.length}
+										</Button>
+
+										<Button 
+											size="sm"
+											type="button"
+											variant="outline-warning"
+											style={{marginRight:5}}
+											onClick={() => this.setState({dataJobs:this.state.dataNextExpireJobs})}
+										>
+											Proximas a vencer {this.state.dataNextExpireJobs.length}
+										</Button>
+
 									</Col>
 								</Row>
 								<br />
 								<Row>
 									{this.state.dataJobs.length > 0 ? (
-										this.state.dataJobs.map((data, key) => {
-											return this.PendingJobs(data, key);
-										})
+										this.state.dataJobs.map((data, key) => this.PendingJobs(data, key))
 									) : (
-										<h3>No tiene tareas asignadas</h3>
+										<h3>No tiene tareas</h3>
 									)}
 								</Row>
 							</Fragment>

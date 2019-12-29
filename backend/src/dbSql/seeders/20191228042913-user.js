@@ -6,19 +6,28 @@ module.exports = {
 			'Users',
 			[
 				{
+					id:1,
 					name: 'cristian  mafla',
 					email: 'cristiancaxi@gmail.com',
-					password:'123456'
+					password:'123456',
+					createdAt:new Date(),
+					updatedAt:new Date()
         },
 				{
-					name: '2 lorem ipsu',
-					email: '2lorem@ipsu.co',
-					password:'123456'
+					id:2,
+					name: 'usuario uno',
+					email: 'usuarios@email.com',
+					password:'123456',
+					createdAt:new Date(),
+					updatedAt:new Date()
 				},
 				{
-					name: '3 lorem ipsu',
-					email: '3lorem@ipsu.co',
-					password:'123456'
+					id:3,
+					name: 'usuario 2',
+					email: 'usuario2@email.com',
+					password:'123456',
+					createdAt:new Date(),
+					updatedAt:new Date()
         },
 			],
 			{}
@@ -26,6 +35,6 @@ module.exports = {
 	},
 
 	down: (queryInterface, Sequelize) => {
-		return queryInterface.bulkDelete('Table', null, {});
+		return queryInterface.bulkDelete('Users', null, {});
 	}
 };

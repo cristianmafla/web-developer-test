@@ -41,9 +41,14 @@ export const user = async (req, res) => {
 export const users = async (req, res) => {
 	try {
 		const totalUsers = await db.User.findAll({});
-		res.status(200).send(totalUsers);
+		if (totalUsers.length > 0) {
+			res.status(200).send({ state: true, data: totalUsers });
+			return;
+		}
+		res.status(400).send({ state: false, data: `No existen usuarios actualmente` });
 	} catch (error) {
-		res.status(500).send(error);
+		console.log('=======error=======> ',error)
+		res.status(500).send({ state: false, data: error });
 	}
 };
 
@@ -54,16 +59,16 @@ export const create = async (req, res) => {
 
 		if (name && email && password) {
 			const existUser = await db.User.findOne({
-				where:{email},
-				raw:true
+				where: { email },
+				raw: true
 			});
-			if(!existUser){
+			if (!existUser) {
 				const newUser = await db.User.create({
 					name,
 					email,
 					password
 				});
-	
+
 				if (newUser) {
 					res.status(200).send({ state: true, data: newUser });
 				} else {
@@ -92,7 +97,6 @@ export const login = async (req, res) => {
 			const myUser = await db.User.findOne({ where: { email, password } });
 
 			if (myUser) {
-
 				const objToken = {
 					id: myUser.dataValues.id,
 					name: myUser.dataValues.name,
@@ -102,8 +106,7 @@ export const login = async (req, res) => {
 				res.status(200).send({
 					state: true,
 					data: jwt.sign(objToken, process.env.SECRET_KEY_TOKEN, { expiresIn: '7d' })
-        });
-        
+				});
 			} else {
 				res
 					.status(400)
