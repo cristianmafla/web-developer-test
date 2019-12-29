@@ -1,10 +1,18 @@
 import express from 'express';
-import * as users from '../dbSql/controllers/users';
+import * as ctrl from '../dbSql/controllers';
 
 const router = express.Router();
 
-router.get('/user', users.user);
+//findOne
+router.get('/user/:id', ctrl.users.user);
 
-router.get('/users', users.users);
+//findAll
+router.get('/users', ctrl.users.users);
+
+//create
+router.post('/user/new', ctrl.users.create);
+
+//login
+router.post('/user/login', ctrl.users.login);
 
 export default router;

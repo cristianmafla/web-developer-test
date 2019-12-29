@@ -24,6 +24,10 @@ app.use(routes.users);
 
 app.use(routes.jobs);
 
+app.use('*',(req,res) => {
+	res.status(404).send({state:false,data:`página no encontrada`})
+})
+
 let httpServer = '';
 if (CONFIG_SERVER.ssl) {
 	httpServer = https.createServer(
