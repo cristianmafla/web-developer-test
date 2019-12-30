@@ -146,7 +146,6 @@ export const deleteJob = async (req, res) => {
 
 		if (id && user) {
 			const existJob = await db.Job.findOne({ where: { id } });
-			console.log('=======existJob=======> ',typeof(existJob))
 			
 			if (existJob) {
 				
