@@ -44,15 +44,22 @@ export default class Jobs extends Component {
 	}
 
 	componentDidMount = async () => {
-		const { data } = await axios.get(`${USER_AND_JOBS}/${getToken().id}`);
-		this.setState({ 
-			dataJobs: data.data.Job,
-			dataJobsCopy:data.data.Job,
-			dataExpiredJobs:this.expiredJobs(data.data.Job),
-			dataNextExpireJobs:this.nextExpireJobs(data.data.Job)
-		});
-		console.log('=======tareas vencidas=======> ',this.expiredJobs(data.data.Job))
-		console.log('=======tareas proximas a vencer=======> ',this.nextExpireJobs(data.data.Job))
+		try {
+			const { data } = await axios.get(`${USER_AND_JOBS}/${getToken().id}`);
+			this.setState({ 
+				dataJobs: data.data.Job,
+				dataJobsCopy:data.data.Job,
+				dataExpiredJobs:this.expiredJobs(data.data.Job),
+				dataNextExpireJobs:this.nextExpireJobs(data.data.Job)
+			});
+		} catch (error) {
+			console.log('=======error=======> ',error)
+			if (typeof(error.response) !== 'undefined' && !error.response.data.state) {
+				alert('error', 'error consultado las tareas del usuario', error.response.data.data);
+				return;
+			}
+			alert('error','error consultado las tareas del usuario','no se pudo consultar las tareas del usuario, intente de nuevo mas tarde')
+		}
 	
 	};
 
@@ -112,6 +119,11 @@ export default class Jobs extends Component {
 			alert('error', 'campos vacíos', 'los campos [ fecha, titulo, prioridad, descripción] son obligatorios');
 		} catch (error) {
 			console.log('=======error=======> ', error.response.data);
+			if (typeof(error.response) !== 'undefined' && !error.response.data.state) {
+				alert('error', 'error modificando la tarea', error.response.data.data);
+				return;
+			}
+			alert('error','error modificando la tarea','no se pudo modificar la tarea, intente de nuevo mas tarde')
 		}
 	};
 
@@ -147,7 +159,7 @@ export default class Jobs extends Component {
 			alert('warning', 'campos vacíos', 'los campos [ fecha, titulo, prioridad, descripción ] son obligatorios');
 		} catch (error) {
 			console.log('=======error=======> ', error);
-			if (!error.response.data.state) {
+			if (typeof(error.response) !== 'undefined' && !error.response.data.state) {
 				alert('error', 'error creando la tarea', error.response.data.data);
 				return;
 			}
@@ -304,15 +316,24 @@ export default class Jobs extends Component {
 
 	deleteJob = async (id) => {
 		try {
+
 			const resultDelete = await axios.post(DELETE_JOB, { id, user: getToken().id });
-			this.setState({ 
-				dataJobs: resultDelete.data.data,
-				dataJobsCopy:resultDelete.data.data,
-				dataExpiredJobs:this.expiredJobs(resultDelete.data.data),
-				dataNextExpireJobs:this.nextExpireJobs(resultDelete.data.data)
-			});
+			console.log('=======resultDelete=======> ',resultDelete)
+			
+			if(resultDelete.data.state){
+
+				this.setState({ 
+					dataJobs: resultDelete.data.data,
+					dataJobsCopy:resultDelete.data.data,
+					dataExpiredJobs:this.expiredJobs(resultDelete.data.data),
+					dataNextExpireJobs:this.nextExpireJobs(resultDelete.data.data)
+				});
+				return true;
+			}
+			return false
+
 		} catch (error) {
-			console.log('=======error=======> ', error.response.data);
+			throw error;
 		}
 	};
 

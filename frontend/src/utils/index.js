@@ -21,10 +21,25 @@ export const alertDeleteJob = (data, deleteJob) => {
 		})
 		.then(async (result) => {
 			if (result.value) {
-        await deleteJob(data.id);
-        sweetAlert.fire('Eliminado', 'Se elimino correctamente', 'success');
+				try {
+					const resultDelete = await deleteJob(data.id);
+					if(resultDelete){
+						sweetAlert.fire('Eliminado', 'Se elimino correctamente', 'success');
+						return;
+					}
+					alert('error', 'error eliminando la tarea', 'no se pudo eliminar la tarea, vuelva a intentarlo mas tarde');
+
+				} catch (error) {
+					console.log('=======error=======> ', error);
+					if (typeof(error.response) !== 'undefined' && !error.response.data.state) {
+						alert('error', 'error eliminando la tarea', error.response.data.data);
+						return;
+					}
+					alert('error', 'error eliminando la tarea', 'no se pudo eliminar la tarea, vuelva a intentarlo mas tarde');
+				}
+				}
 			}
-		});
+		);
 };
 
 export const addToken = (data) => sessionStorage.setItem('token', data);
